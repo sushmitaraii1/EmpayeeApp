@@ -1,0 +1,354 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="PMSModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Calculation">
+          <Key>
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="Employee Name" Type="varchar" MaxLength="50" />
+          <Property Name="Married" Type="bit" Nullable="false" />
+          <Property Name="Monthly Salary" Type="money" Nullable="false" />
+          <Property Name="CIT" Type="bit" Nullable="false" />
+          <Property Name="PF" Type="bit" Nullable="false" />
+          <Property Name="Taxable Amount" Type="money" Nullable="false" />
+          <Property Name="Tax" Type="money" Nullable="false" />
+          <Property Name="Salary" Type="money" Nullable="false" />
+          <Property Name="Month" Type="date" Nullable="false" />
+          <Property Name="Days" Type="int" Nullable="false" />
+          <Property Name="Leave" Type="int" Nullable="false" />
+          <Property Name="StaffId" Type="int" Nullable="false" />
+          <Property Name="Allowance" Type="money" Nullable="false" />
+          <Property Name="Bonus" Type="money" Nullable="false" />
+        </EntityType>
+        <EntityType Name="EventCalendar">
+          <Key>
+            <PropertyRef Name="EventId" />
+          </Key>
+          <Property Name="EventId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Subject" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="varchar" MaxLength="300" />
+          <Property Name="Start" Type="datetime" Nullable="false" />
+          <Property Name="End" Type="datetime" />
+          <Property Name="ThemeColor" Type="varchar" MaxLength="50" />
+          <Property Name="IsFullDay" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Role">
+          <Key>
+            <PropertyRef Name="RoleId" />
+          </Key>
+          <Property Name="RoleId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="RoleType" Type="varchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Staff">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserName" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Password" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Full_Name" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Designation" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Joined_date" Type="date" Nullable="false" />
+          <Property Name="role_id" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="TaxBrackekt">
+          <Key>
+            <PropertyRef Name="Bracket Id" />
+          </Key>
+          <Property Name="Bracket Id" Type="int" Nullable="false" />
+          <Property Name="First Bracket" Type="float" Nullable="false" />
+          <Property Name="Second Bracket" Type="float" Nullable="false" />
+          <Property Name="Third Bracket" Type="float" Nullable="false" />
+          <Property Name="Fourth Bracket" Type="float" Nullable="false" />
+          <Property Name="Fifth Bracket" Type="float" Nullable="false" />
+        </EntityType>
+        <EntityType Name="TaxSlab">
+          <Key>
+            <PropertyRef Name="Slab Id" />
+          </Key>
+          <Property Name="Slab Id" Type="int" Nullable="false" />
+          <Property Name="First Slab" Type="money" Nullable="false" />
+          <Property Name="Second Slab" Type="money" Nullable="false" />
+          <Property Name="Third Slab" Type="money" Nullable="false" />
+          <Property Name="Fourth Slab" Type="money" Nullable="false" />
+          <Property Name="Married" Type="bit" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_Calculation_Staff">
+          <End Role="Staff" Type="Self.Staff" Multiplicity="1" />
+          <End Role="Calculation" Type="Self.Calculation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staff">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Calculation">
+              <PropertyRef Name="StaffId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Staff_Role">
+          <End Role="Role" Type="Self.Role" Multiplicity="1" />
+          <End Role="Staff" Type="Self.Staff" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Role">
+              <PropertyRef Name="RoleId" />
+            </Principal>
+            <Dependent Role="Staff">
+              <PropertyRef Name="role_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="PMSModelStoreContainer">
+          <EntitySet Name="Calculation" EntityType="Self.Calculation" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EventCalendar" EntityType="Self.EventCalendar" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Role" EntityType="Self.Role" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Staff" EntityType="Self.Staff" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TaxBrackekt" EntityType="Self.TaxBrackekt" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TaxSlab" EntityType="Self.TaxSlab" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_Calculation_Staff" Association="Self.FK_Calculation_Staff">
+            <End Role="Staff" EntitySet="Staff" />
+            <End Role="Calculation" EntitySet="Calculation" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Staff_Role" Association="Self.FK_Staff_Role">
+            <End Role="Role" EntitySet="Role" />
+            <End Role="Staff" EntitySet="Staff" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="PMSModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Calculation">
+          <Key>
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="Employee_Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Married" Type="Boolean" Nullable="false" />
+          <Property Name="Monthly_Salary" Type="Decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="CIT" Type="Boolean" Nullable="false" />
+          <Property Name="PF" Type="Boolean" Nullable="false" />
+          <Property Name="Taxable_Amount" Type="Decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="Tax" Type="Decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="Salary" Type="Decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="Month" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="Days" Type="Int32" Nullable="false" />
+          <Property Name="Leave" Type="Int32" Nullable="false" />
+          <Property Name="StaffId" Type="Int32" Nullable="false" />
+          <Property Name="Allowance" Type="Decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="Bonus" Type="Decimal" Precision="19" Scale="4" Nullable="false" />
+          <NavigationProperty Name="Staff" Relationship="Self.FK_Calculation_Staff" FromRole="Calculation" ToRole="Staff" />
+        </EntityType>
+        <EntityType Name="EventCalendar">
+          <Key>
+            <PropertyRef Name="EventId" />
+          </Key>
+          <Property Name="EventId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Subject" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
+          <Property Name="Start" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="End" Type="DateTime" Precision="3" />
+          <Property Name="ThemeColor" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="IsFullDay" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Role">
+          <Key>
+            <PropertyRef Name="RoleId" />
+          </Key>
+          <Property Name="RoleId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="RoleType" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Staffs" Relationship="Self.FK_Staff_Role" FromRole="Role" ToRole="Staff" />
+        </EntityType>
+        <EntityType Name="Staff">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Password" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Full_Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Designation" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Joined_date" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="role_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Calculations" Relationship="Self.FK_Calculation_Staff" FromRole="Staff" ToRole="Calculation" />
+          <NavigationProperty Name="Role" Relationship="Self.FK_Staff_Role" FromRole="Staff" ToRole="Role" />
+        </EntityType>
+        <EntityType Name="TaxBrackekt">
+          <Key>
+            <PropertyRef Name="Bracket_Id" />
+          </Key>
+          <Property Name="Bracket_Id" Type="Int32" Nullable="false" />
+          <Property Name="First_Bracket" Type="Double" Nullable="false" />
+          <Property Name="Second_Bracket" Type="Double" Nullable="false" />
+          <Property Name="Third_Bracket" Type="Double" Nullable="false" />
+          <Property Name="Fourth_Bracket" Type="Double" Nullable="false" />
+          <Property Name="Fifth_Bracket" Type="Double" Nullable="false" />
+        </EntityType>
+        <EntityType Name="TaxSlab">
+          <Key>
+            <PropertyRef Name="Slab_Id" />
+          </Key>
+          <Property Name="Slab_Id" Type="Int32" Nullable="false" />
+          <Property Name="First_Slab" Type="Decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="Second_Slab" Type="Decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="Third_Slab" Type="Decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="Fourth_Slab" Type="Decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="Married" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_Calculation_Staff">
+          <End Role="Staff" Type="Self.Staff" Multiplicity="1" />
+          <End Role="Calculation" Type="Self.Calculation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staff">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Calculation">
+              <PropertyRef Name="StaffId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Staff_Role">
+          <End Role="Role" Type="Self.Role" Multiplicity="1" />
+          <End Role="Staff" Type="Self.Staff" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Role">
+              <PropertyRef Name="RoleId" />
+            </Principal>
+            <Dependent Role="Staff">
+              <PropertyRef Name="role_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="PMSEntities3" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Calculations" EntityType="Self.Calculation" />
+          <EntitySet Name="EventCalendars" EntityType="Self.EventCalendar" />
+          <EntitySet Name="Roles" EntityType="Self.Role" />
+          <EntitySet Name="Staffs" EntityType="Self.Staff" />
+          <EntitySet Name="TaxBrackekts" EntityType="Self.TaxBrackekt" />
+          <EntitySet Name="TaxSlabs" EntityType="Self.TaxSlab" />
+          <AssociationSet Name="FK_Calculation_Staff" Association="Self.FK_Calculation_Staff">
+            <End Role="Staff" EntitySet="Staffs" />
+            <End Role="Calculation" EntitySet="Calculations" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Staff_Role" Association="Self.FK_Staff_Role">
+            <End Role="Role" EntitySet="Roles" />
+            <End Role="Staff" EntitySet="Staffs" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="PMSModelStoreContainer" CdmEntityContainer="PMSEntities3">
+          <EntitySetMapping Name="Calculations">
+            <EntityTypeMapping TypeName="PMSModel.Calculation">
+              <MappingFragment StoreEntitySet="Calculation">
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="Employee_Name" ColumnName="Employee Name" />
+                <ScalarProperty Name="Married" ColumnName="Married" />
+                <ScalarProperty Name="Monthly_Salary" ColumnName="Monthly Salary" />
+                <ScalarProperty Name="CIT" ColumnName="CIT" />
+                <ScalarProperty Name="PF" ColumnName="PF" />
+                <ScalarProperty Name="Taxable_Amount" ColumnName="Taxable Amount" />
+                <ScalarProperty Name="Tax" ColumnName="Tax" />
+                <ScalarProperty Name="Salary" ColumnName="Salary" />
+                <ScalarProperty Name="Month" ColumnName="Month" />
+                <ScalarProperty Name="Days" ColumnName="Days" />
+                <ScalarProperty Name="Leave" ColumnName="Leave" />
+                <ScalarProperty Name="StaffId" ColumnName="StaffId" />
+                <ScalarProperty Name="Allowance" ColumnName="Allowance" />
+                <ScalarProperty Name="Bonus" ColumnName="Bonus" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EventCalendars">
+            <EntityTypeMapping TypeName="PMSModel.EventCalendar">
+              <MappingFragment StoreEntitySet="EventCalendar">
+                <ScalarProperty Name="EventId" ColumnName="EventId" />
+                <ScalarProperty Name="Subject" ColumnName="Subject" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Start" ColumnName="Start" />
+                <ScalarProperty Name="End" ColumnName="End" />
+                <ScalarProperty Name="ThemeColor" ColumnName="ThemeColor" />
+                <ScalarProperty Name="IsFullDay" ColumnName="IsFullDay" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Roles">
+            <EntityTypeMapping TypeName="PMSModel.Role">
+              <MappingFragment StoreEntitySet="Role">
+                <ScalarProperty Name="RoleId" ColumnName="RoleId" />
+                <ScalarProperty Name="RoleType" ColumnName="RoleType" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Staffs">
+            <EntityTypeMapping TypeName="PMSModel.Staff">
+              <MappingFragment StoreEntitySet="Staff">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="Full_Name" ColumnName="Full_Name" />
+                <ScalarProperty Name="Designation" ColumnName="Designation" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Joined_date" ColumnName="Joined_date" />
+                <ScalarProperty Name="role_id" ColumnName="role_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TaxBrackekts">
+            <EntityTypeMapping TypeName="PMSModel.TaxBrackekt">
+              <MappingFragment StoreEntitySet="TaxBrackekt">
+                <ScalarProperty Name="Bracket_Id" ColumnName="Bracket Id" />
+                <ScalarProperty Name="First_Bracket" ColumnName="First Bracket" />
+                <ScalarProperty Name="Second_Bracket" ColumnName="Second Bracket" />
+                <ScalarProperty Name="Third_Bracket" ColumnName="Third Bracket" />
+                <ScalarProperty Name="Fourth_Bracket" ColumnName="Fourth Bracket" />
+                <ScalarProperty Name="Fifth_Bracket" ColumnName="Fifth Bracket" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TaxSlabs">
+            <EntityTypeMapping TypeName="PMSModel.TaxSlab">
+              <MappingFragment StoreEntitySet="TaxSlab">
+                <ScalarProperty Name="Slab_Id" ColumnName="Slab Id" />
+                <ScalarProperty Name="First_Slab" ColumnName="First Slab" />
+                <ScalarProperty Name="Second_Slab" ColumnName="Second Slab" />
+                <ScalarProperty Name="Third_Slab" ColumnName="Third Slab" />
+                <ScalarProperty Name="Fourth_Slab" ColumnName="Fourth Slab" />
+                <ScalarProperty Name="Married" ColumnName="Married" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

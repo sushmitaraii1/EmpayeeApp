@@ -1,0 +1,148 @@
+﻿@model EmpayeeApp.Models.Calculation
+
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+    <div style="margin-left:15%">
+        <style>
+            table, th, td {
+                border: 2px solid black;
+                border-collapse: collapse;
+                padding: 5px;
+            }
+
+            th {
+                text-transform: uppercase;
+                background-color: #eae8e8;
+            }
+
+            th, td {
+                padding: 5px;
+            }
+
+            h2 {
+                margin-left: -20%;
+                text-transform: uppercase;
+                text-align: center;
+            }
+        </style>
+
+
+
+        <h2>PaySlip</h2>
+
+
+        <table width="80%">
+            <tr>
+                <td>
+                    <table style="width:100%">
+                        <tr>
+                            <th colspan="2" style="width:50%"> Employee Details</th>
+                        </tr>
+
+            </tr>
+            <tr>
+                <td>Employee name</td>
+                <td>@Html.DisplayFor(model => model.Employee_Name)</td>
+
+
+            </tr>
+            <tr>
+                <td>Employeeid</td>
+
+                <td>@Html.DisplayFor(model => model.UserId)</td>
+
+
+            </tr>
+            <tr>
+                <td> Married</td>
+                <td>@Html.DisplayFor(model => model.Married)</td>
+
+            </tr>
+
+
+        </table>
+        <br>
+        <table style="width:100%">
+            <tr>
+                <th colspan="2"> Employee Work Details</th>
+            </tr>
+
+            <tr>
+                <td>Month</td>
+                <td>@Html.DisplayFor(model => model.Month)</td>
+
+            </tr>
+            <tr>
+                <td>Days</td>
+                <td>@Html.DisplayFor(model => model.Days)</td>
+
+            </tr>
+            <tr>
+                <td>Leave</td>
+                <td>@Html.DisplayFor(model => model.Leave)</td>
+
+
+            </tr>
+        </table>
+        <br />
+        <table style="width:80%">
+            <tr>
+                <th colspan="2"> Employee Salary Details</th>
+            </tr>
+            <tr>
+                <td>Monthly Salary</td>
+                <td>@Html.DisplayFor(model => model.Monthly_Salary)</td>
+
+            </tr>
+
+            <tr>
+                <td>CIT</td>
+                <td>@Html.DisplayFor(model => model.CIT)</td>
+
+            </tr>
+            <tr>
+                <td>PF</td>
+                <td>@Html.DisplayFor(model => model.PF)</td>
+
+
+            </tr>
+            <tr>
+                <td>Taxable Amount</td>
+                <td>@Html.DisplayFor(model => model.Taxable_Amount)</td>
+
+
+            </tr>
+            <tr>
+                <td>Tax</td>
+                <td>@Html.DisplayFor(model => model.Tax)</td>
+
+
+            </tr>
+            <tr>
+                <td>Salary</td>
+                <td>@Html.DisplayFor(model => model.Salary)</td>
+
+
+            </tr>
+            <tr>
+                <td>Allowance</td>
+                <td>@Html.DisplayFor(model => model.Allowance)</td>
+
+            </tr>
+            <tr>
+                <td>Bonus</td>
+                <td>@Html.DisplayFor(model => model.Bonus)</td>
+
+            </tr>
+        </table>
+    </div>
+    </body>
+</html>

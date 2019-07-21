@@ -1,0 +1,54 @@
+﻿@model IEnumerable<EmpayeeApp.Models.TaxSlab>
+
+@{
+    ViewBag.Title = "SlabDetails";
+}
+
+<h2>SlabDetails</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.First_Slab)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Second_Slab)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Third_Slab)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Fourth_Slab)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Married)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.First_Slab)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Second_Slab)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Third_Slab)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Fourth_Slab)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Married)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.Slab_Id }) |
+
+            </td>
+        </tr>
+    }
+
+</table>
