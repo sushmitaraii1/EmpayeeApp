@@ -25,7 +25,9 @@ namespace EmpayeeApp.Controllers
             using (PMSEntities3 db = new PMSEntities3())
 
             {
-                Calculation emp = db.Calculations.Find(id);
+                var CalculationDetail = db.Calculations.Where(x => x.StaffId == id).First();
+                int cid = CalculationDetail.UserId;
+                Calculation emp = db.Calculations.Find(cid);
                 if (emp == null)
                 {
                     return HttpNotFound();

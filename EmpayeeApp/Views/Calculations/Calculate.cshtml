@@ -32,14 +32,15 @@
         <th>
             @Html.DisplayNameFor(model => model.Bonus)
         </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Salary)
-        </th>
+
         <th>
             @Html.DisplayNameFor(model => model.Taxable_Amount)
         </th>
         <th>
             @Html.DisplayNameFor(model => model.Tax)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Salary)
         </th>
         <th></th>
     </tr>
@@ -68,19 +69,20 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Bonus)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Salary)
-            </td>
+           
             <td>
                 @Html.DisplayFor(modelItem => item.Taxable_Amount)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Tax)
             </td>
+             <td>
+                @Html.DisplayFor(modelItem => item.Salary)
+            </td>
             <td>
                 @Html.ActionLink("Details", "Details", new { id = item.UserId }) |
                 @Html.ActionLink("Edit", "Edit", new { id = item.UserId }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.UserId }) 
+                @Html.ActionLink("Delete", "Delete", new { id = item.UserId })
             </td>
 </tr>
 

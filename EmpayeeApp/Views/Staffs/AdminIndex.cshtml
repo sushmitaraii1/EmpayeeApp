@@ -1,6 +1,10 @@
 ﻿@model IEnumerable<EmpayeeApp.Models.Staff>
 
 @{
+    if (Session["UserId"] == null)
+        {
+            Response.Redirect("~/Account/Login");
+        }
     ViewBag.Title = "AdminIndex";
 }
 
@@ -31,10 +35,10 @@
             <th></th>
         </tr>
     </thead>
-    
-        @foreach (var item in Model)
-        {
-         <tbody>   
+
+    @foreach (var item in Model)
+    {
+        <tbody>
             <tr>
                 <td>
                     @Html.DisplayFor(modelItem => item.UserName)
@@ -56,11 +60,11 @@
                 </td>
                 <td>
                     <button class="btn btn-default"> @Html.ActionLink("Edit", "Edit", new { id = item.Id }) </button>
-                    <button  class="btn btn-default">@Html.ActionLink("Details", "Details", new { id = item.Id })</button>
-                    <button  class="btn btn-default">@Html.ActionLink("Delete", "Delete", new { id = item.Id })</button>
+                    <button class="btn btn-default">@Html.ActionLink("Details", "Details", new { id = item.Id })</button>
+                    <button class="btn btn-default">@Html.ActionLink("Delete", "Delete", new { id = item.Id })</button>
                 </td>
             </tr>
-         </tbody>   
-        }
+        </tbody>
+    }
 
 </table>

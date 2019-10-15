@@ -1,4 +1,10 @@
 ﻿@model IEnumerable<EmpayeeApp.Models.Calculation>
+@{
+    if (Session["UserId"] == null)
+    {
+        Response.Redirect("~/Account/Login");
+    }
+}
 
 
 <!DOCTYPE html>
@@ -66,7 +72,7 @@
                             </tr>
                             <tr>
                                 <td>Month</td>
-                                <td>@Html.DisplayFor(model => item.Month)</td>
+                                <td>@DateTime.Now.Month</td>
                             </tr>
                             <tr>
                                 <td>Days</td>

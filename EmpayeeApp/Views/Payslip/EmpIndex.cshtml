@@ -1,5 +1,10 @@
 ﻿@model EmpayeeApp.Models.Calculation
-
+@{ 
+    if (Session["UserId"] == null)
+    {
+        Response.Redirect("~/Account/Login");
+    }
+}
 
 
 <!DOCTYPE html>

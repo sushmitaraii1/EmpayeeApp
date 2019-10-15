@@ -28,6 +28,7 @@ namespace EmpayeeApp.Controllers
 
                 bool isValid = context.Staffs.Any(x => x.UserName == model.UserName && x.Password == model.Password);
                 var userDetaills = db.Staffs.Where(x => x.UserName == model.UserName && x.Password == model.Password).FirstOrDefault();
+                
                 if (isValid)
                 {
                     FormsAuthentication.SetAuthCookie(model.UserName, false);
@@ -42,8 +43,9 @@ namespace EmpayeeApp.Controllers
                     //    return RedirectToAction("Index", "workers");
 
                 }
-                ModelState.AddModelError("", "Invalid username and password");
+                ModelState.AddModelError("", "Invalid username or password");
                 return View();
+               
             }
 
         }

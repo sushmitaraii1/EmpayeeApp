@@ -14,7 +14,7 @@ namespace EmpayeeApp.Controllers
     [Authorize]
     public class CalculationsController : Controller
     {
-        PMSEntities3 db = new PMSEntities3();
+        private PMSEntities3 db = new PMSEntities3();
 
         // GET: Calculations
         public ActionResult BeforeIndex()
@@ -92,10 +92,12 @@ namespace EmpayeeApp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "UserId,Employee_Name,Married,Monthly_Salary,CIT,PF,Taxable_Amount,Tax,Salary,Month,Days,Leave,StaffId,Allowance,Bonus")] Calculation calculation)
         {
+            PMSEntities3 newstate = new PMSEntities3();
             if (ModelState.IsValid)
             {
-                var sname = db.Staffs.ToList();
-                var calc = db.Calculations.ToList();
+                
+                var sname = newstate.Staffs.ToList();
+                var calc = newstate.Calculations.ToList();
                 foreach (var item in calc)
                 {
                     foreach (var sitem in sname)
@@ -104,11 +106,11 @@ namespace EmpayeeApp.Controllers
                         { item.Employee_Name = sitem.Full_Name; }
                     }
                 }
-                //db.Entry(calculation).State = EntityState.Modified;
+                db.Entry(calculation).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Calculate");
             }
-            ViewBag.StaffId = new SelectList(db.Staffs, "Id", "UserName", calculation.StaffId);
+            ViewBag.StaffId = new SelectList(newstate.Staffs, "Id", "UserName", calculation.StaffId);
             return View(calculation);
         }
 
@@ -135,12 +137,14 @@ namespace EmpayeeApp.Controllers
             Calculation calculation = db.Calculations.Find(id);
             db.Calculations.Remove(calculation);
             db.SaveChanges();
-            return RedirectToAction("BeforeIndex");
+            return RedirectToAction("Calculate");
         }
 
         // GET: Calculation
         public ActionResult Calculate([Bind(Include = "UserId,Employee_Name,Married,Monthly_Salary,CIT,PF,Taxable_Amount,Tax,Salary,Month,Days,Leave,StaffId,Allowance,Bonus")]Calculation calculation)
         {
+            decimal GrossSalary;
+            decimal CIT;
 
             /*using (PayrollEntities entities = new PayrollEntities())
             {*/
@@ -151,75 +155,74 @@ namespace EmpayeeApp.Controllers
             var bracket = db.TaxBrackekts.ToList();
             foreach (var item in calc)
             {
+                item.Days = 31-item.Leave;
+                
                 foreach (var bracketvalue in bracket)
                 {
 
 
+                    GrossSalary = (decimal)(item.Monthly_Salary * 12) + item.Allowance + item.Bonus + (decimal)0.1 * (item.Monthly_Salary * 12);
                     if (item.CIT == true)
                     {
-                        item.Taxable_Amount = (decimal)((item.Monthly_Salary * 12) + item.Allowance + item.Bonus) - (decimal)0.1 * (item.Monthly_Salary * 12) - (decimal)0.1 * (item.Monthly_Salary * 12);
+                        CIT = (decimal)0.23 * (item.Monthly_Salary * 12);
+                        if (CIT > 300000)
+                        { CIT = 300000; }
+                        item.Taxable_Amount = GrossSalary - (decimal)0.2 * (item.Monthly_Salary * 12) - CIT;
                     }
                     else
                     {
-                        item.Taxable_Amount = (decimal)((item.Monthly_Salary * 12) + item.Allowance + item.Bonus) - (decimal)0.1 * (item.Monthly_Salary * 12);
+                        item.Taxable_Amount = GrossSalary - (decimal)0.2 * (item.Monthly_Salary * 12);
                     }
                     foreach (var slabvalue in slab2)
                     {
 
-                        if (item.Married == false && ((item.Monthly_Salary * 12) <= slabvalue.First_Slab))
+                        if (item.Married == false && ((item.Taxable_Amount) <= slabvalue.First_Slab))
                         {
-                            item.Tax = ((decimal)bracketvalue.First_Bracket * (item.Monthly_Salary * 12));
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * (item.Taxable_Amount));
                         }
-                        else if (item.Married == false && ((item.Monthly_Salary * 12) > slabvalue.First_Slab) && ((item.Monthly_Salary * 12) <= slabvalue.Second_Slab))
+                        else if (item.Married == false && ((item.Taxable_Amount) > slabvalue.First_Slab) && ((item.Taxable_Amount) <= slabvalue.Second_Slab))
                         {
-                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * ((item.Monthly_Salary * 12) - slabvalue.First_Slab));
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * ((item.Taxable_Amount) - slabvalue.First_Slab));
                         }
-                        else if (item.Married == false && ((item.Monthly_Salary * 12) > slabvalue.Second_Slab) && ((item.Monthly_Salary * 12) <= slabvalue.Third_Slab))
+                        else if (item.Married == false && ((item.Taxable_Amount) > slabvalue.Second_Slab) && ((item.Taxable_Amount) <= slabvalue.Third_Slab))
                         {
-                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue.Second_Slab + (decimal)bracketvalue.Third_Bracket * ((item.Monthly_Salary * 12) - slabvalue.Second_Slab));
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue.Second_Slab + (decimal)bracketvalue.Third_Bracket * ((item.Taxable_Amount) - slabvalue.Second_Slab));
                         }
-                        else if (item.Married == false && ((item.Monthly_Salary * 12) > slabvalue.Third_Slab) && ((item.Monthly_Salary * 12) <= slabvalue.Fourth_Slab))
+                        else if (item.Married == false && ((item.Taxable_Amount) > slabvalue.Third_Slab) && ((item.Taxable_Amount) <= slabvalue.Fourth_Slab))
                         {
-                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * ((item.Monthly_Salary * 12) - slabvalue.Third_Slab));
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * ((item.Taxable_Amount) - slabvalue.Third_Slab));
                         }
-                        else if (item.Married == false && ((item.Monthly_Salary * 12) > slabvalue.Fourth_Slab))
+                        else if (item.Married == false )
                         {
-                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * slabvalue.Fourth_Slab + (decimal)bracketvalue.Fifth_Bracket * ((item.Monthly_Salary * 12) - slabvalue.Fourth_Slab));
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue.Third_Slab + (decimal)bracketvalue.Fourth_Bracket *( slabvalue.Fourth_Slab-slabvalue.Third_Slab) + (decimal)bracketvalue.Fifth_Bracket * ((item.Taxable_Amount) - slabvalue.Fourth_Slab));
                         }
-                        else
-                        {
-                            item.Tax = (decimal)0.0;
-                        }
-
+                        
                     }
                     foreach (var slabvalue1 in slab1)
                     {
-                        if (item.Married == true && ((item.Monthly_Salary * 12) <= slabvalue1.First_Slab))
+                        if (item.Married == true && ((item.Taxable_Amount) <= slabvalue1.First_Slab))
                         {
-                            item.Tax = ((decimal)bracketvalue.First_Bracket * (item.Monthly_Salary * 12));
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * (item.Taxable_Amount));
                         }
-                        else if (item.Married == true && ((item.Monthly_Salary * 12) > slabvalue1.First_Slab) && ((item.Monthly_Salary * 12) <= slabvalue1.Second_Slab))
+                        else if (item.Married == true && ((item.Taxable_Amount) > slabvalue1.First_Slab) && ((item.Taxable_Amount) <= slabvalue1.Second_Slab))
                         {
-                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * ((item.Monthly_Salary * 12) - slabvalue1.First_Slab));
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * ((item.Taxable_Amount) - slabvalue1.First_Slab));
                         }
-                        else if (item.Married == true && ((item.Monthly_Salary * 12) > slabvalue1.Second_Slab) && ((item.Monthly_Salary * 12) <= slabvalue1.Third_Slab))
+                        else if (item.Married == true && ((item.Taxable_Amount) > slabvalue1.Second_Slab) && ((item.Taxable_Amount) <= slabvalue1.Third_Slab))
                         {
-                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue1.Second_Slab + (decimal)bracketvalue.Third_Bracket * ((item.Monthly_Salary * 12) - slabvalue1.Second_Slab));
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue1.Second_Slab + (decimal)bracketvalue.Third_Bracket * ((item.Taxable_Amount) - slabvalue1.Second_Slab));
                         }
-                        else if (item.Married == true && ((item.Monthly_Salary * 12) > slabvalue1.Third_Slab) && ((item.Monthly_Salary * 12) <= slabvalue1.Fourth_Slab))
+                        else if (item.Married == true && ((item.Taxable_Amount) > slabvalue1.Third_Slab) && ((item.Taxable_Amount) <= slabvalue1.Fourth_Slab))
                         {
-                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue1.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue1.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * ((item.Monthly_Salary * 12) - slabvalue1.Third_Slab));
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue1.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue1.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * ((item.Taxable_Amount) - slabvalue1.Third_Slab));
                         }
-                        else if (item.Married == true && ((item.Monthly_Salary * 12) > slabvalue1.Fourth_Slab))
+                        else if (item.Married == true && ((item.Taxable_Amount) > slabvalue1.Fourth_Slab))
                         {
-                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue1.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue1.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * slabvalue1.Fourth_Slab + (decimal)bracketvalue.Fifth_Bracket * ((item.Monthly_Salary * 12) - slabvalue1.Fourth_Slab));
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue1.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue1.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * (slabvalue1.Fourth_Slab - slabvalue1.Third_Slab) + (decimal)bracketvalue.Fifth_Bracket * ((item.Taxable_Amount) - slabvalue1.Fourth_Slab));
                         }
-                        else
-                        {
-                            item.Tax = (decimal)0.0;
-                        }
+                        
                     }
-                    item.Salary = item.Taxable_Amount - item.Tax;
+                    item.Salary = (item.Taxable_Amount - item.Tax)/12;
                     foreach (var sitem in sname)
                     {
                         if (item.StaffId == sitem.Id)
@@ -241,98 +244,103 @@ namespace EmpayeeApp.Controllers
         }
         public ActionResult EmpCalculate([Bind(Include = "UserId,Employee_Name,Married,Monthly_Salary,CIT,PF,Taxable_Amount,Tax,Salary,Month,Days,Leave,StaffId,Allowance,Bonus")]Calculation calculation, int id)
         {
-
+            decimal GrossSalary;
+            decimal CIT;
             /*using (PayrollEntities entities = new PayrollEntities())
             {*/
-            var sname = db.Staffs.Where(x => x.Id == id).First();
-            var item = db.Calculations.Where(x => x.UserId == id).First();
+
+            var CalculationDetail = db.Calculations.Where(x => x.StaffId == id).First();
+            int cid = CalculationDetail.UserId;
+            var sname = db.Staffs.Where(x => x.Id == id).FirstOrDefault();
+            var item = db.Calculations.Find(cid);
             var slab1 = db.TaxSlabs.Where(x => x.Married == true).ToList();
             var slab2 = db.TaxSlabs.Where(x => x.Married == false).ToList();
             var bracket = db.TaxBrackekts.ToList();
             foreach (var bracketvalue in bracket)
             {
-                if (item.CIT == true)
-                {
-                    item.Taxable_Amount = (decimal)((item.Monthly_Salary * 12) + item.Allowance + item.Bonus) - (decimal)0.1 * (item.Monthly_Salary * 12) - (decimal)0.1 * (item.Monthly_Salary * 12);
-                }
-                else
-                {
-                    item.Taxable_Amount = (decimal)((item.Monthly_Salary * 12) + item.Allowance + item.Bonus) - (decimal)0.1 * (item.Monthly_Salary * 12);
-                }
-                foreach (var slabvalue in slab2)
-                {
-
-                    if (item.Married == false && ((item.Monthly_Salary * 12) <= slabvalue.First_Slab))
+                item.Days = 31-item.Leave;
+              
+                    GrossSalary = (decimal)(item.Monthly_Salary * 12) + item.Allowance + item.Bonus + (decimal)0.1 * (item.Monthly_Salary * 12);
+                    if (item.CIT == true)
                     {
-                        item.Tax = ((decimal)bracketvalue.First_Bracket * (item.Monthly_Salary * 12));
-                    }
-                    else if (item.Married == false && ((item.Monthly_Salary * 12) > slabvalue.First_Slab) && ((item.Monthly_Salary * 12) <= slabvalue.Second_Slab))
-                    {
-                        item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * ((item.Monthly_Salary * 12) - slabvalue.First_Slab));
-                    }
-                    else if (item.Married == false && ((item.Monthly_Salary * 12) > slabvalue.Second_Slab) && ((item.Monthly_Salary * 12) <= slabvalue.Third_Slab))
-                    {
-                        item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue.Second_Slab + (decimal)bracketvalue.Third_Bracket * ((item.Monthly_Salary * 12) - slabvalue.Second_Slab));
-                    }
-                    else if (item.Married == false && ((item.Monthly_Salary * 12) > slabvalue.Third_Slab) && ((item.Monthly_Salary * 12) <= slabvalue.Fourth_Slab))
-                    {
-                        item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * ((item.Monthly_Salary * 12) - slabvalue.Third_Slab));
-                    }
-                    else if (item.Married == false && ((item.Monthly_Salary * 12) > slabvalue.Fourth_Slab))
-                    {
-                        item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * slabvalue.Fourth_Slab + (decimal)bracketvalue.Fifth_Bracket * ((item.Monthly_Salary * 12) - slabvalue.Fourth_Slab));
+                        CIT = (decimal)0.23 * (item.Monthly_Salary * 12);
+                        if (CIT > 300000)
+                        { CIT = 300000; }
+                        item.Taxable_Amount = GrossSalary - (decimal)0.2 * (item.Monthly_Salary * 12) - CIT;
                     }
                     else
                     {
-                        item.Tax = (decimal)0.0;
+                        item.Taxable_Amount = GrossSalary - (decimal)0.2 * (item.Monthly_Salary * 12);
                     }
+                    foreach (var slabvalue in slab2)
+                    {
 
+                        if (item.Married == false && ((item.Taxable_Amount) <= slabvalue.First_Slab))
+                        {
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * (item.Taxable_Amount));
+                        }
+                        else if (item.Married == false && ((item.Taxable_Amount) > slabvalue.First_Slab) && ((item.Taxable_Amount) <= slabvalue.Second_Slab))
+                        {
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * ((item.Taxable_Amount) - slabvalue.First_Slab));
+                        }
+                        else if (item.Married == false && ((item.Taxable_Amount) > slabvalue.Second_Slab) && ((item.Taxable_Amount) <= slabvalue.Third_Slab))
+                        {
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue.Second_Slab + (decimal)bracketvalue.Third_Bracket * ((item.Taxable_Amount) - slabvalue.Second_Slab));
+                        }
+                        else if (item.Married == false && ((item.Taxable_Amount) > slabvalue.Third_Slab) && ((item.Taxable_Amount) <= slabvalue.Fourth_Slab))
+                        {
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * ((item.Taxable_Amount) - slabvalue.Third_Slab));
+                        }
+                        else if (item.Married == false && ((item.Taxable_Amount) > slabvalue.Fourth_Slab))
+                        {
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * (slabvalue.Fourth_Slab - slabvalue.Third_Slab) + (decimal)bracketvalue.Fifth_Bracket * ((item.Taxable_Amount) - slabvalue.Fourth_Slab));
+                        }
+
+
+                    }
+                    foreach (var slabvalue1 in slab1)
+                    {
+                        if (item.Married == true && ((item.Taxable_Amount) <= slabvalue1.First_Slab))
+                        {
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * (item.Taxable_Amount));
+                        }
+                        else if (item.Married == true && ((item.Taxable_Amount) > slabvalue1.First_Slab) && ((item.Taxable_Amount) <= slabvalue1.Second_Slab))
+                        {
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * ((item.Taxable_Amount) - slabvalue1.First_Slab));
+                        }
+                        else if (item.Married == true && ((item.Taxable_Amount) > slabvalue1.Second_Slab) && ((item.Taxable_Amount) <= slabvalue1.Third_Slab))
+                        {
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue1.Second_Slab + (decimal)bracketvalue.Third_Bracket * ((item.Taxable_Amount) - slabvalue1.Second_Slab));
+                        }
+                        else if (item.Married == true && ((item.Taxable_Amount) > slabvalue1.Third_Slab) && ((item.Taxable_Amount) <= slabvalue1.Fourth_Slab))
+                        {
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue1.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue1.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * ((item.Taxable_Amount) - slabvalue1.Third_Slab));
+                        }
+                        else if (item.Married == true && ((item.Taxable_Amount) > slabvalue1.Fourth_Slab))
+                        {
+                            item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue1.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue1.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * (slabvalue1.Fourth_Slab - slabvalue1.Third_Slab) + (decimal)bracketvalue.Fifth_Bracket * ((item.Taxable_Amount) - slabvalue1.Fourth_Slab));
+                        }
+
+                    }
+                    item.Salary = (item.Taxable_Amount - item.Tax) / 12;
+                    if (item.StaffId == sname.Id)
+                    { item.Employee_Name = sname.Full_Name; }
                 }
-                foreach (var slabvalue1 in slab1)
+                if (ModelState.IsValid)
                 {
-                    if (item.Married == true && ((item.Monthly_Salary * 12) <= slabvalue1.First_Slab))
-                    {
-                        item.Tax = ((decimal)bracketvalue.First_Bracket * (item.Monthly_Salary * 12));
-                    }
-                    else if (item.Married == true && ((item.Monthly_Salary * 12) > slabvalue1.First_Slab) && ((item.Monthly_Salary * 12) <= slabvalue1.Second_Slab))
-                    {
-                        item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * ((item.Monthly_Salary * 12) - slabvalue1.First_Slab));
-                    }
-                    else if (item.Married == true && ((item.Monthly_Salary * 12) > slabvalue1.Second_Slab) && ((item.Monthly_Salary * 12) <= slabvalue1.Third_Slab))
-                    {
-                        item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue1.Second_Slab + (decimal)bracketvalue.Third_Bracket * ((item.Monthly_Salary * 12) - slabvalue1.Second_Slab));
-                    }
-                    else if (item.Married == true && ((item.Monthly_Salary * 12) > slabvalue1.Third_Slab) && ((item.Monthly_Salary * 12) <= slabvalue1.Fourth_Slab))
-                    {
-                        item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue1.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue1.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * ((item.Monthly_Salary * 12) - slabvalue1.Third_Slab));
-                    }
-                    else if (item.Married == true && ((item.Monthly_Salary * 12) > slabvalue1.Fourth_Slab))
-                    {
-                        item.Tax = ((decimal)bracketvalue.First_Bracket * slabvalue1.First_Slab + (decimal)bracketvalue.Second_Bracket * slabvalue1.Second_Slab + (decimal)bracketvalue.Third_Bracket * slabvalue1.Third_Slab + (decimal)bracketvalue.Fourth_Bracket * slabvalue1.Fourth_Slab + (decimal)bracketvalue.Fifth_Bracket * ((item.Monthly_Salary * 12) - slabvalue1.Fourth_Slab));
-                    }
-                    else
-                    {
-                        item.Tax = (decimal)0.0;
+                    if (calculation != null)
+                    {// db.Entry(calculation).State = EntityState.Modified;
+                        db.SaveChanges();
                     }
                 }
-                item.Salary = item.Taxable_Amount - item.Tax;
-                if (item.StaffId == sname.Id)
-                { item.Employee_Name = sname.Full_Name; }
-            }
-            if (ModelState.IsValid)
-            {
-                if (calculation != null)
-                {// db.Entry(calculation).State = EntityState.Modified;
-                    db.SaveChanges();
+                Calculation emp = db.Calculations.Find(cid);
+                if (emp == null)
+                {
+                    return HttpNotFound();
                 }
+                return View(emp);
             }
-            Calculation emp = db.Calculations.Find(id);
-            if (emp == null)
-            {
-                return HttpNotFound();
-            }
-            return View(emp);
-        }
+        
 
         protected override void Dispose(bool disposing)
         {
@@ -345,3 +353,4 @@ namespace EmpayeeApp.Controllers
 
     }
 }
+

@@ -8,6 +8,7 @@
     else
     { <h2>Edit Tax Slab for Married Employee</h2>}
 }
+
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
@@ -57,5 +58,12 @@
 }
 
 <div>
-    @Html.ActionLink("Back to Detaills", "BracketDetails", "TaxPlan")
+    @Html.ActionLink("Back to Detaills", "BracketDetails", "TaxPlan")  |
+
+    @if (Model.Slab_Id == 1)
+    {
+        @Html.ActionLink("Edit Married Slab", "EditTaxSlab", new { id = 2 })}
+    else
+    { @Html.ActionLink("Edit Unmarried Slab", "EditTaxSlab", new { id = 1 })
+    }
 </div>
